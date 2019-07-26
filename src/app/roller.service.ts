@@ -35,19 +35,18 @@ export class RollerService {
     const temp = matches[ 0 ];
     delim = temp[ temp.search( /[+-/*]|k/ ) ];
     let splitOnDelim = temp.split( /[+-/*]|k/ );
-    console.log( temp, delim, splitOnDelim );
+    console.log( "Temp, Delim, splitOnDelim",temp, delim, splitOnDelim );
 
     //Base Die
     //fixed index splitOnDelim, change if supporting numeric and die adding
-    //TODO: solve if no num before d, if case then default to num dice 1
     if ( (splitOnDelim[ 0 ].search( /^d/ ) ) >= 0) {
-      console.log("no leading num E.G. d8")
+      //console.log("no leading num E.G. d8")
       let splitOnBaseDie = splitOnDelim[ 0 ].replace( /d/, "" );
       num = 1;
       die = Number( splitOnBaseDie );
       console.log(splitOnBaseDie, num, die)
     } else {
-      console.log("leading num")
+      //console.log("leading num")
       let splitOnBaseDie = splitOnDelim[ 0 ].split( /d/ )
       num = Number( splitOnBaseDie[ 0 ] );
       die = Number( splitOnBaseDie[ 1 ] );
@@ -65,13 +64,10 @@ export class RollerService {
     for ( let i = 0; i < num; i++ ){
       set[ i ] = this.rollDie( die );
     }
-    return set;
+    return { rolls: set, die: die };
   }
 
   private rollDie ( die: number ) {
-    return  {
-      die: "d" + die,
-      roll: Math.floor( Math.random() * ( die ) + 1 )
-    };
+    return  Math.floor( Math.random() * ( die ) + 1 )
   }
 }
