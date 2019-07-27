@@ -7,13 +7,14 @@ import { RollerService } from '../roller.service'
   styleUrls: ['tab1.page.scss']
 })
 export class Tab1Page {
-
+  inputString;
   constructor (public roller_:RollerService) {
 
   }
 
   test() {
-    console.log( this.roller_.rollSet( 6, 20 ) );
+    console.log( this.roller_.roll( 6, 20 ) );
+    this.roller_.rollParser( this.inputString );
   }
 
 }
