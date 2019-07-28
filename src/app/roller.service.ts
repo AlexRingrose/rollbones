@@ -12,32 +12,29 @@ export class RollerService {
   /*
     My regex filter:
     https://regexr.com/4i2nq
-    /((\d*)?d(\d+)(([+-/*]\d+(?!d))|(k\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?){1}/g
+    /((\d*)?d(\d+)(([+-]\d+(?!d))|(k\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?){1}/g
   */
-
-  //TODO: add support for numeric and die adding e.g. 2d6 + d6 + 2
 
   rollParser ( input: string ) {
     let matches: Array<string>;
     //match dice rolls in traditional format with modifiers up to 4 'terms'
     matches = input.match(
-      /((\d*)?d(\d+)(([+-/*]\d+(?!d))|(k\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?){1}/g
+      /((\d*)?d(\d+)(([+-]\d+(?!d))|(k\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?){1}/g
     );
     console.log( matches );
 
     //TODO: For single match, loop or functionify for multi matches
 
     const singleMatch = matches[ 0 ];
-    let rolls: Array<any> = [];
-    const delims = [ '' ].concat( singleMatch.match( /[+-/*]|k/g ) );
-    let splitOnDelim = singleMatch.split( /[+-/*]|k/g );
+    let rolls: Array<RollObject> = [];
+    const delims = [ '' ].concat( singleMatch.match( /[+-]|k/g ) );
+    let splitOnDelim = singleMatch.split( /[+-]|k/g );
     console.log( "This match: ", singleMatch );
 
     for ( let i = 0; i < splitOnDelim.length; i++ ) {
       let num: number, die: number;
       let splitOnSecondary = splitOnDelim[ i ];
       if ( delims[ i ] === 'k' ) {
-        //TODO: Keep <splitOnDelim[i] highest dice>
         console.log( 'Roll Type: K#' )
         let res: RollObject = {
           result: [], die: 0,
@@ -78,7 +75,39 @@ export class RollerService {
         rolls[ i ] = res;
       }
     }
-    console.log( 'roll Set:', rolls );
+    const logReturn = this.getTotal( rolls );
+    console.log( "logReturn : ", logReturn );
+    return logReturn;
+  }
+
+  getTotal ( rolls: Array<RollObject> ) {
+    let setTotal = 0;
+    rolls.forEach( roll => {
+      let rollTotal = 0;
+      if ( roll.func === 'k' ) {
+        roll.result = this.keepDice( roll.result, roll.mod )
+      }
+
+      roll.result.forEach( ele => {
+        rollTotal += ele
+      } );
+      roll.total = rollTotal + roll.mod;
+
+      if ( roll.func === "" ) {
+        setTotal = roll.total;
+      } else if ( roll.func === '+' ) {
+        setTotal += roll.total;
+      } else if ( roll.func === '-' ) {
+        setTotal -= roll.total;
+      }
+
+    } );
+    return { setTotal: setTotal, rolls: rolls };
+  }
+
+  keepDice ( result: Array<any>, num: number ) {
+    result.sort();
+    return result.slice( 0, result.length - 1 - ( num - 1 ) );
   }
 
   rollDice ( num: number, die: number ) {
