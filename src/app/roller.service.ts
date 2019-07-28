@@ -1,4 +1,5 @@
 import { Injectable, SystemJsNgModuleLoader } from '@angular/core';
+import { RollObject } from "./roll-object";
 import { strict } from 'assert';
 
 @Injectable( {
@@ -18,7 +19,6 @@ export class RollerService {
 
   rollParser ( input: string ) {
     let matches: Array<string>;
-    let rollSet: Array<any> = [];
     //match dice rolls in traditional format with modifiers up to 4 'terms'
     matches = input.match(
       /((\d*)?d(\d+)(([+-/*]\d+(?!d))|(k\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?(([+-/*]\d+(?!d))|(\d+)|([+-/*](\d*)?d\d+))?){1}/g
@@ -27,25 +27,30 @@ export class RollerService {
 
     //TODO: For single match, loop or functionify for multi matches
 
-    //TODO:~ K not dealt with yet
     const singleMatch = matches[ 0 ];
-    const delims = singleMatch.match( /[+-/*]|k/g );
+    let rollSet: Array<any> = [];
+    const delims = [ '' ].concat( singleMatch.match( /[+-/*]|k/g ) );
     let splitOnDelim = singleMatch.split( /[+-/*]|k/g );
     console.log( "This match: ", singleMatch );
 
     for ( let i = 0; i < splitOnDelim.length; i++ ) {
       let num: number, die: number;
       let splitOnSecondary = splitOnDelim[ i ];
-      if ( delims[ i - 1 ] === 'k' ) {
+      if ( delims[ i ] === 'k' ) {
         //TODO: Keep <splitOnDelim[i] highest dice>
+        console.log( 'Roll Type: K#' )
+        let res: RollObject = {
+          rolls: [], die: 0,
+          func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
+        }
+        rollSet[ i ] = res;
 
       } else if ( ( splitOnSecondary.match( /(d)/ ) ) === null ) {
         console.log( 'Roll Type: #' );
-        let res = {};
-        Object.assign( res, {
+        let res: RollObject = {
           rolls: [], die: 0,
-          func: delims[ i - 1 ], mod: splitOnSecondary
-        } );
+          func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
+        }
         rollSet[ i ] = res;
 
       } else if ( ( splitOnSecondary.match( /^d/g ) ) !== null ) {
@@ -54,11 +59,10 @@ export class RollerService {
         num = 1;
         die = Number( splitOnDie );
         let tres = this.roll( num, die );
-        let res = {};
-        Object.assign( res, {
+        let res: RollObject = {
           rolls: tres.rolls, die: tres.die,
-          func: delims[ i - 1 ], mod: 0
-        } );
+          func: delims[ i ], mod: 0, total: 0
+        };
         rollSet[ i ] = res;
 
       } else {
@@ -67,11 +71,10 @@ export class RollerService {
         num = Number( splitOnDie[ 0 ] );
         die = Number( splitOnDie[ 1 ] );
         let tres = this.roll( num, die );
-        let res = {};
-        Object.assign( res, {
+        let res: RollObject = {
           rolls: tres.rolls, die: tres.die,
-          func: delims[ i - 1 ], mod: 0
-        } );
+          func: delims[ i ], mod: 0, total: 0
+        };
         rollSet[ i ] = res;
       }
     }
