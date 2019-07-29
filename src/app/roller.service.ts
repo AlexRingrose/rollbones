@@ -6,8 +6,10 @@ import { strict } from 'assert';
   providedIn: 'root'
 } )
 export class RollerService {
-  constructor () {
+  rollHistory: Array<any>;
 
+  constructor () {
+    this.rollHistory = [];
   }
   /*
     My regex filter:
@@ -16,6 +18,7 @@ export class RollerService {
   */
 
   rollParser ( input: string ) {
+    let rollSets: Array<any> = [];
     let matches: Array<string>;
     //match dice rolls in traditional format with modifiers up to 4 'terms'
     matches = input.match(
@@ -23,64 +26,69 @@ export class RollerService {
     );
     console.log( matches );
 
-    //TODO: For single match, loop or functionify for multi matches
+    //Loop through pattern matches and process each roll
+    for ( let i = 0; i < matches.length; i++ ) {
 
-    const singleMatch = matches[ 0 ];
-    let rolls: Array<RollObject> = [];
-    const delims = [ '' ].concat( singleMatch.match( /[+-]|k/g ) );
-    let splitOnDelim = singleMatch.split( /[+-]|k/g );
-    console.log( "This match: ", singleMatch );
+      const singleMatch = matches[ i ];
+      let rolls: Array<RollObject> = [];
+      const delims = [ '' ].concat( singleMatch.match( /[+-]|k/g ) );
+      let splitOnDelim = singleMatch.split( /[+-]|k/g );
+      console.log( "This match: ", singleMatch );
 
-    for ( let i = 0; i < splitOnDelim.length; i++ ) {
-      let num: number, die: number;
-      let splitOnSecondary = splitOnDelim[ i ];
-      if ( delims[ i ] === 'k' ) {
-        console.log( 'Roll Type: K#' )
-        let res: RollObject = {
-          result: [], die: 0,
-          func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
+      for ( let i = 0; i < splitOnDelim.length; i++ ) {
+        let num: number, die: number;
+        let splitOnSecondary = splitOnDelim[ i ];
+        if ( delims[ i ] === 'k' ) {
+          console.log( 'Roll Type: K#' )
+          let res: RollObject = {
+            result: [], die: 0,
+            func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
+          }
+          rolls[ i ] = res;
+
+        } else if ( ( splitOnSecondary.match( /(d)/ ) ) === null ) {
+          console.log( 'Roll Type: #' );
+          let res: RollObject = {
+            result: [], die: 0,
+            func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
+          }
+          rolls[ i ] = res;
+
+        } else if ( ( splitOnSecondary.match( /^d/g ) ) !== null ) {
+          console.log( 'Roll Type: d#' );
+          let splitOnDie = splitOnSecondary.replace( /d/, "" );
+          num = 1;
+          die = Number( splitOnDie );
+          let tres = this.rollDice( num, die );
+          let res: RollObject = {
+            result: tres.result, die: tres.die,
+            func: delims[ i ], mod: 0, total: 0
+          };
+          rolls[ i ] = res;
+
+        } else {
+          console.log( 'Roll Type: #d#' );
+          let splitOnDie = splitOnSecondary.split( /d/ )
+          num = Number( splitOnDie[ 0 ] );
+          die = Number( splitOnDie[ 1 ] );
+          let tres = this.rollDice( num, die );
+          let res: RollObject = {
+            result: tres.result, die: tres.die,
+            func: delims[ i ], mod: 0, total: 0
+          };
+          rolls[ i ] = res;
         }
-        rolls[ i ] = res;
-
-      } else if ( ( splitOnSecondary.match( /(d)/ ) ) === null ) {
-        console.log( 'Roll Type: #' );
-        let res: RollObject = {
-          result: [], die: 0,
-          func: delims[ i ], mod: Number( splitOnSecondary ), total: 0
-        }
-        rolls[ i ] = res;
-
-      } else if ( ( splitOnSecondary.match( /^d/g ) ) !== null ) {
-        console.log( 'Roll Type: d#' );
-        let splitOnDie = splitOnSecondary.replace( /d/, "" );
-        num = 1;
-        die = Number( splitOnDie );
-        let tres = this.rollDice( num, die );
-        let res: RollObject = {
-          result: tres.result, die: tres.die,
-          func: delims[ i ], mod: 0, total: 0
-        };
-        rolls[ i ] = res;
-
-      } else {
-        console.log( 'Roll Type: #d#' );
-        let splitOnDie = splitOnSecondary.split( /d/ )
-        num = Number( splitOnDie[ 0 ] );
-        die = Number( splitOnDie[ 1 ] );
-        let tres = this.rollDice( num, die );
-        let res: RollObject = {
-          result: tres.result, die: tres.die,
-          func: delims[ i ], mod: 0, total: 0
-        };
-        rolls[ i ] = res;
       }
+      const logReturn = this.calcTotal( rolls );
+      console.log( "logReturn : ", logReturn );
+      this.rollHistory.push( logReturn );
+      rollSets[ i ] = logReturn;
     }
-    const logReturn = this.getTotal( rolls );
-    console.log( "logReturn : ", logReturn );
-    return logReturn;
+
+    return rollSets;
   }
 
-  getTotal ( rolls: Array<RollObject> ) {
+  calcTotal ( rolls: Array<RollObject> ) {
     let setTotal = 0;
     rolls.forEach( roll => {
       let rollTotal = 0;
