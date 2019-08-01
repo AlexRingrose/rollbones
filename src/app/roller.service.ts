@@ -79,16 +79,14 @@ export class RollerService {
           rolls[ i ] = res;
         }
       }
-      const logReturn = this.calcTotal( rolls );
-      console.log( "logReturn : ", logReturn );
-      this.rollHistory.push( logReturn );
-      rollSets[ i ] = logReturn;
-    }
 
+      rollSets[ i ] = this.calcTotal( rolls, singleMatch );
+    }
+    this.rollHistory.push( rollSets );
     return rollSets;
   }
 
-  public calcTotal ( rolls: Array<RollObject> ) {
+  public calcTotal ( rolls: Array<RollObject>, match: string ) {
     let setTotal = 0;
     rolls.forEach( roll => {
       let rollTotal = 0;
@@ -110,7 +108,7 @@ export class RollerService {
       }
 
     } );
-    return { setTotal: setTotal, rolls: rolls };
+    return { setTotal: setTotal, rollString: match, rolls: rolls };
   }
 
   public getHistory () {
