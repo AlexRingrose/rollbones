@@ -6,7 +6,7 @@ import { strict } from 'assert';
   providedIn: 'root'
 } )
 export class RollerService {
-  rollHistory: Array<any>;
+  private rollHistory: Array<any>;
 
   constructor () {
     this.rollHistory = [];
@@ -17,8 +17,7 @@ export class RollerService {
     /((\d*)?d(\d+)(([+-]\d+(?!d))|(k\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?){1}/g
   */
 
-  rollParser ( input: string ) {
-    let rollSets: Array<any> = [];
+  public rollParser ( input: string ) {
     let matches: Array<string>;
     //match dice rolls in traditional format with modifiers up to 4 'terms'
     matches = input.match(
@@ -79,16 +78,13 @@ export class RollerService {
           rolls[ i ] = res;
         }
       }
-      const logReturn = this.calcTotal( rolls );
-      console.log( "logReturn : ", logReturn );
-      this.rollHistory.push( logReturn );
-      rollSets[ i ] = logReturn;
+
+      this.rollHistory.push( this.calcTotal( rolls, singleMatch ) );
     }
 
-    return rollSets;
   }
 
-  calcTotal ( rolls: Array<RollObject> ) {
+  public calcTotal ( rolls: Array<RollObject>, match: string ) {
     let setTotal = 0;
     rolls.forEach( roll => {
       let rollTotal = 0;
@@ -110,15 +106,19 @@ export class RollerService {
       }
 
     } );
-    return { setTotal: setTotal, rolls: rolls };
+    return { setTotal: setTotal, rollString: match, rolls: rolls };
   }
 
-  keepDice ( result: Array<any>, num: number ) {
+  public getHistory () {
+    return this.rollHistory;
+  }
+
+  private keepDice ( result: Array<any>, num: number ) {
     result.sort();
     return result.slice( 0, result.length - 1 - ( num - 1 ) );
   }
 
-  rollDice ( num: number, die: number ) {
+  private rollDice ( num: number, die: number ) {
     let rolls: Array<any> = [];
     for ( let i = 0; i < num; i++ ) {
       rolls[ i ] = this.rnd( die );
