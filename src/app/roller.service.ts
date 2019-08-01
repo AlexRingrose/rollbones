@@ -17,7 +17,7 @@ export class RollerService {
     /((\d*)?d(\d+)(([+-]\d+(?!d))|(k\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?(([+-]\d+(?!d))|(\d+)|([+-](\d*)?d\d+))?){1}/g
   */
 
-  rollParser ( input: string ) {
+  public rollParser ( input: string ) {
     let rollSets: Array<any> = [];
     let matches: Array<string>;
     //match dice rolls in traditional format with modifiers up to 4 'terms'
@@ -88,7 +88,7 @@ export class RollerService {
     return rollSets;
   }
 
-  calcTotal ( rolls: Array<RollObject> ) {
+  public calcTotal ( rolls: Array<RollObject> ) {
     let setTotal = 0;
     rolls.forEach( roll => {
       let rollTotal = 0;
@@ -113,12 +113,16 @@ export class RollerService {
     return { setTotal: setTotal, rolls: rolls };
   }
 
-  keepDice ( result: Array<any>, num: number ) {
+  public getHistory () {
+    return this.rollHistory;
+  }
+
+  private keepDice ( result: Array<any>, num: number ) {
     result.sort();
     return result.slice( 0, result.length - 1 - ( num - 1 ) );
   }
 
-  rollDice ( num: number, die: number ) {
+  private rollDice ( num: number, die: number ) {
     let rolls: Array<any> = [];
     for ( let i = 0; i < num; i++ ) {
       rolls[ i ] = this.rnd( die );
