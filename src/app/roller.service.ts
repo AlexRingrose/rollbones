@@ -6,7 +6,7 @@ import { strict } from 'assert';
   providedIn: 'root'
 } )
 export class RollerService {
-  rollHistory: Array<any>;
+  private rollHistory: Array<any>;
 
   constructor () {
     this.rollHistory = [];
