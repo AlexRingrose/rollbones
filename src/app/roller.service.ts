@@ -18,7 +18,6 @@ export class RollerService {
   */
 
   public rollParser ( input: string ) {
-    let rollSets: Array<any> = [];
     let matches: Array<string>;
     //match dice rolls in traditional format with modifiers up to 4 'terms'
     matches = input.match(
@@ -80,10 +79,9 @@ export class RollerService {
         }
       }
 
-      rollSets[ i ] = this.calcTotal( rolls, singleMatch );
+      this.rollHistory.push( this.calcTotal( rolls, singleMatch ) );
     }
-    this.rollHistory.push( rollSets );
-    return rollSets;
+
   }
 
   public calcTotal ( rolls: Array<RollObject>, match: string ) {
