@@ -109,8 +109,11 @@ export class RollerService {
     return { setTotal: setTotal, rollString: match, rolls: rolls };
   }
 
-  public getHistory () {
-    return this.rollHistory;
+  public getHistory ( num?: number ) {
+    if ( num && this.rollHistory.length > num ) {
+      return this.rollHistory.slice( this.rollHistory.length - num, this.rollHistory.length );
+    } else
+      return this.rollHistory;
   }
 
   private keepDice ( result: Array<any>, num: number ) {
