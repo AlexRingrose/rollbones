@@ -15,7 +15,7 @@ export class Tab1Page {
 
   test () {
     this.roller_.rollParser( this.inputString );
-    this.rollHistory = this.roller_.getHistory();
+    this.rollHistory = this.roller_.getHistory( 6 );
     console.log( "RollHistory: ", this.rollHistory );
   }
 
